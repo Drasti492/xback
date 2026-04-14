@@ -26,7 +26,6 @@ router.post("/stk-push", async (req, res) => {
 
     console.log(" STK PUSH START:", payment.reference);
 
-    // IMPORTANT: replace with your PayHero env
     const response = await axios.post(
       `${process.env.PAYHERO_BASE_URL}/api/v2/payments`,
       {
