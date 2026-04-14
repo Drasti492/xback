@@ -6,9 +6,8 @@ const Order = require("../models/order");
 const router = express.Router();
 
 
-// ===============================
 // INITIATE PAYMENT (STK PUSH)
-// ===============================
+
 router.post("/stk-push", async (req, res) => {
   try {
     const { phone, amountKES, orderId } = req.body;
@@ -25,9 +24,9 @@ router.post("/stk-push", async (req, res) => {
       order: orderId || null
     });
 
-    console.log("🚀 STK PUSH START:", payment.reference);
+    console.log(" STK PUSH START:", payment.reference);
 
-    // 🔴 IMPORTANT: replace with your PayHero env
+    // IMPORTANT: replace with your PayHero env
     const response = await axios.post(
       `${process.env.PAYHERO_BASE_URL}/api/v2/payments`,
       {
@@ -53,15 +52,15 @@ router.post("/stk-push", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ STK ERROR:", err.message);
+    console.error(" STK ERROR FULL:", err.response?.data || err.message);
     res.status(500).json({ success: false });
   }
 });
 
 
-// ===============================
+
 // CALLBACK FROM PAYHERO
-// ===============================
+
 router.post("/callback", async (req, res) => {
   try {
     const externalRef = req.body?.response?.ExternalReference;
@@ -78,7 +77,7 @@ router.post("/callback", async (req, res) => {
       payment.status = "success";
       await payment.save();
 
-      // ✅ UPDATE ORDER AFTER PAYMENT SUCCESS
+      //  UPDATE ORDER AFTER PAYMENT SUCCESS
       if (payment.order) {
         await Order.findByIdAndUpdate(payment.order, {
           paid: true,
@@ -86,18 +85,18 @@ router.post("/callback", async (req, res) => {
         });
       }
 
-      console.log("✅ PAYMENT SUCCESS:", payment.reference);
+      console.log(" PAYMENT SUCCESS:", payment.reference);
 
     } else {
       payment.status = "failed";
       await payment.save();
-      console.log("❌ PAYMENT FAILED:", payment.reference);
+      console.log(" PAYMENT FAILED:", payment.reference);
     }
 
     res.sendStatus(200);
 
   } catch (err) {
-    console.error("❌ CALLBACK ERROR:", err);
+    console.error(" CALLBACK ERROR:", err);
     res.sendStatus(500);
   }
 });
